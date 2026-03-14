@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Just Listen</title>
+
+<script>
+
+const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+
+const mobileHTML = `
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Just Listen</title>
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',Tahoma,sans-serif;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+display:flex;
+flex-direction:column;
+height:100vh;
+}
+
+/* HEADER */
+
+.header{
+display:grid;
+grid-template-columns:1fr 2fr 1fr;
+align-items:center;
+padding:15px 25px;
+font-size:20px;
+font-weight:600;
+}
+
+.search-bar{
+display:flex;
+justify-content:center;
+}
+
+.search-bar input{
+width:60%;
+padding:10px;
+border-radius:25px;
+border:none;
+outline:none;
+font-size:14px;
+}
+
+/* MAIN LAYOUT */
+
+.main-layout{
+display:flex;
+flex:1;
+gap:20px;
+padding:20px;
+overflow:hidden;
+margin-bottom:10px;
+}
+
+.left-panel{
+flex:1;
+overflow-y:auto;
+}
+
+/* SONG LIST */
+
+.song-card{
+display:flex;
+align-items:center;
+background:rgba(255,255,255,0.08);
+border-radius:15px;
+padding:12px;
+margin-bottom:12px;
+cursor:pointer;
+transition:0.2s;
+}
+
+.song-card:hover{
+background:rgba(255,255,255,0.15);
+}
+
+.song-card img{
+width:60px;
+height:60px;
+border-radius:10px;
+object-fit:cover;
+margin-right:15px;
+}
+
+.song-title{
+font-size:16px;
+}
+
+.artist{
+font-size:12px;
+color:#cbd5e1;
+}
+
+/* MINI PLAYER */
+
+.footer{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:72px;
+background:#0f172a;
+padding:10px 20px;
+display:flex;
+align-items:center;
+gap:12px;
+border-radius:15px 15px 0 0;
+box-sizing:border-box;
+}
+
+.mini-progress{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:4px;
+background:rgba(255,255,255,0.25);
+overflow:hidden;
+}
+
+#miniProgress{
+height:100%;
+width:0%;
+background:white;
+}
+
+.footer img{
+width:50px;
+height:50px;
+border-radius:8px;
+}
+
+#footerTitle{
+font-size:14px;
+font-weight:500;
+line-height:1.1;
+}
+
+#footerArtist{
+font-size:11px;
+color:#cbd5e1;
+margin-top:2px;
+}
+
+.info{
+flex:1;
+cursor:pointer;
+display:flex;
+flex-direction:column;
+justify-content:center;
+}
+
+.controls{
+display:flex;
+gap:12px;
+}
+
+.controls button{
+background:none;
+border:none;
+color:white;
+font-size:20px;
+cursor:pointer;
+}
+
+/* FULL PLAYER */
+
+.full-player{
+position:fixed;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background:#0f172a;
+display:none;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+z-index:999;
+padding:30px;
+}
+
+.close{
+position:absolute;
+top:20px;
+left:20px;
+font-size:26px;
+cursor:pointer;
+}
+
+.full-player img{
+width:260px;
+border-radius:18px;
+margin-bottom:28px;
+}
+
+#fullTitle{
+font-size:18px;
+margin-bottom:6px;
+}
+
+#fullArtist{
+font-size:13px;
+color:#cbd5e1;
+margin-bottom:20px;
+}
+
+.progress-container{
+width:80%;
+height:6px;
+background:#444;
+border-radius:4px;
+cursor:pointer;
+position:relative;
+}
+
+.progress{
+height:100%;
+width:0%;
+background:#22c55e;
+border-radius:4px;
+position:relative;
+}
+
+.progress::after{
+content:"";
+position:absolute;
+right:-7px;
+top:50%;
+transform:translateY(-50%);
+width:14px;
+height:14px;
+background:white;
+border-radius:50%;
+}
+
+.time{
+display:flex;
+justify-content:space-between;
+width:80%;
+font-size:12px;
+margin-top:5px;
+}
+
+.full-controls{
+margin-top:25px;
+display:flex;
+gap:25px;
+}
+
+.full-controls button{
+width:60px;
+height:60px;
+border-radius:50%;
+border:none;
+background:#22c55e;
+color:white;
+font-size:22px;
+cursor:pointer;
+}
+
+.hover-time{
+position:absolute;
+top:-25px;
+background:black;
+padding:3px 6px;
+border-radius:4px;
+font-size:11px;
+display:none;
+transform:translateX(-50%);
+white-space:nowrap;
+}
+
+.left-panel::-webkit-scrollbar{
+width:4px;
+}
+
+.left-panel::-webkit-scrollbar-thumb{
+background:#475569;
+border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+<div>Just Listen</div>
+
+<div class="search-bar">
+<input type="text" id="searchInput" placeholder="SEARCH SONGS">
+</div>
+
+<div></div>
+
+</div>
+
+<div class="main-layout">
+
+<div class="left-panel">
+<div id="songList"></div>
+</div>
+
+</div>
+
+<!-- MINI PLAYER -->
+
+<div class="footer">
+
+<div class="mini-progress">
+<div id="miniProgress"></div>
+</div>
+
+<img id="footerCover">
+
+<div class="info" id="openFull">
+<div id="footerTitle"></div>
+<div id="footerArtist"></div>
+</div>
+
+<div class="controls">
+<button onclick="prevSong()">⏮</button>
+<button onclick="togglePlay()" id="playBtn">▶</button>
+<button onclick="nextSong()">⏭</button>
+</div>
+
+</div>
+
+<!-- FULL PLAYER -->
+
+<div class="full-player" id="fullPlayer">
+
+<div class="close" onclick="closePlayer()">←</div>
+
+<img id="fullCover">
+
+<div id="fullTitle"></div>
+<div id="fullArtist"></div>
+
+<div class="progress-container" id="progressContainer">
+<div class="progress" id="progress"></div>
+<div class="hover-time" id="hoverTime">0:00</div>
+</div>
+
+<div class="time">
+<span id="currentTime">0:00</span>
+<span id="duration">0:00</span>
+</div>
+
+<div class="full-controls">
+<button onclick="prevSong()">⏮</button>
+<button onclick="togglePlay()" id="fullPlayBtn">▶</button>
+<button onclick="nextSong()">⏭</button>
+</div>
+
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+
+const songs=[
+
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Kadhale-Kadhale.mp3",
+title:"Kadhale Kadhale",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Enna-Nadanthalum-MassTamilan.com.mp3",
+title:"Enna Nadanthalum",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Vaadi-Pulla-Vaadi.mp3",
+title:"Vaadi Pulla Vaadi",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Anbe%20Aaruyirae.mp3",
+title:"Anbe Aaruyire",
+artist:"Prashan Sean",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Oxygen-Thanthale.mp3",
+title:"Oxygen Thanthale",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Meesaya-Murukku.mp3",
+title:"Meesaya Murukku",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+}
+
+];
+
+let currentIndex=0;
+
+const audio=document.getElementById("audio");
+const playBtn=document.getElementById("playBtn");
+
+const progressContainer=document.getElementById("progressContainer");
+const progress=document.getElementById("progress");
+const hoverTime=document.getElementById("hoverTime");
+
+function updateIcons(){
+
+const icon = audio.paused ? "▶" : "⏸";
+
+playBtn.textContent=icon;
+
+document.getElementById("fullPlayBtn").textContent=icon;
+
+}
+
+audio.onplay=updateIcons;
+audio.onpause=updateIcons;
+
+function loadSong(i){
+
+const s=songs[i];
+
+audio.src=s.url;
+
+footerTitle.textContent=s.title;
+footerArtist.textContent=s.artist;
+footerCover.src=s.cover;
+
+fullTitle.textContent=s.title;
+fullArtist.textContent=s.artist;
+fullCover.src=s.cover;
+
+}
+
+function togglePlay(){
+audio.paused ? audio.play() : audio.pause();
+}
+
+function nextSong(){
+currentIndex=(currentIndex+1)%songs.length;
+loadSong(currentIndex);
+audio.play();
+}
+
+function prevSong(){
+currentIndex=(currentIndex-1+songs.length)%songs.length;
+loadSong(currentIndex);
+audio.play();
+}
+
+audio.addEventListener("ended",nextSong);
+
+/* PROGRESS */
+
+audio.addEventListener("timeupdate",()=>{
+
+if(!audio.duration)return;
+
+let percent=(audio.currentTime/audio.duration)*100;
+
+miniProgress.style.width=percent+"%";
+
+progress.style.width=percent+"%";
+
+currentTime.textContent=format(audio.currentTime);
+
+duration.textContent=format(audio.duration);
+
+});
+
+progressContainer.onclick=(e)=>{
+
+const rect=progressContainer.getBoundingClientRect();
+
+let percent=(e.clientX-rect.left)/rect.width;
+
+audio.currentTime=percent*audio.duration;
+
+};
+
+function format(sec){
+
+let m=Math.floor(sec/60)||0;
+
+let s=Math.floor(sec%60)||0;
+
+return m+":"+s.toString().padStart(2,"0");
+
+}
+
+/* PLAYER OPEN */
+
+openFull.onclick=()=>{
+fullPlayer.style.display="flex";
+history.pushState({playerOpen:true}, "");
+};
+
+footerCover.onclick=()=>{
+fullPlayer.style.display="flex";
+history.pushState({playerOpen:true}, "");
+};
+
+function closePlayer(){
+fullPlayer.style.display="none";
+history.back();
+}
+
+/* SONG LIST */
+
+songs.forEach((song,i)=>{
+
+const card=document.createElement("div");
+
+card.className="song-card";
+
+card.innerHTML =
+"<img src='"+song.cover+"'>" +
+"<div>" +
+"<div class='song-title'>"+song.title+"</div>" +
+"<div class='artist'>"+song.artist+"</div>" +
+"</div>";
+
+card.onclick=()=>{
+currentIndex=i;
+loadSong(i);
+audio.play();
+};
+
+songList.appendChild(card);
+
+});
+
+loadSong(currentIndex);
+
+/* SEARCH */
+
+document.getElementById("searchInput").addEventListener("input",(e)=>{
+
+const query=e.target.value.toLowerCase();
+
+[...songList.children].forEach(card=>{
+
+const text=card.innerText.toLowerCase();
+
+card.style.display=text.includes(query) ? "flex" : "none";
+
+});
+
+});
+
+/* SHOW TIME WHILE DRAGGING */
+
+function showDragTime(percent){
+
+if(!audio.duration) return;
+
+let time=percent*audio.duration;
+
+hoverTime.style.display="block";
+hoverTime.style.left=(percent * progressContainer.offsetWidth) + "px";
+hoverTime.textContent=format(time);
+
+}
+
+
+/* DRAG SEEK (DESKTOP + MOBILE) */
+
+let isDragging=false;
+
+progressContainer.addEventListener("mousedown",()=>{
+isDragging=true;
+});
+
+document.addEventListener("mouseup",()=>{
+isDragging=false;
+hoverTime.style.display="none";
+});
+
+document.addEventListener("mousemove",(e)=>{
+
+if(!isDragging) return;
+
+const rect=progressContainer.getBoundingClientRect();
+
+let percent=(e.clientX-rect.left)/rect.width;
+
+percent=Math.max(0,Math.min(1,percent));
+
+audio.currentTime=percent*audio.duration;
+
+showDragTime(percent);
+
+});
+
+
+/* MOBILE DRAG */
+
+let startY = 0;
+let currentY = 0;
+
+fullPlayer.addEventListener("touchstart",(e)=>{
+if(isDragging) return;
+startY = e.touches[0].clientY;
+});
+
+fullPlayer.addEventListener("touchmove",(e)=>{
+if(isDragging) return;
+
+currentY = e.touches[0].clientY;
+
+if(currentY - startY > 120){
+closePlayer();
+}
+});
+
+progressContainer.addEventListener("touchstart",()=>{
+isDragging=true;
+});
+
+document.addEventListener("touchend",()=>{
+isDragging=false;
+hoverTime.style.display="none";
+});
+
+document.addEventListener("touchmove",(e)=>{
+
+if(!isDragging) return;
+
+const rect=progressContainer.getBoundingClientRect();
+
+let percent=(e.touches[0].clientX-rect.left)/rect.width;
+
+percent=Math.max(0,Math.min(1,percent));
+
+audio.currentTime=percent*audio.duration;
+
+showDragTime(percent);
+
+});
+
+/* MOBILE BACK BUTTON SUPPORT */
+
+window.addEventListener("popstate",()=>{
+
+if(fullPlayer.style.display==="flex"){
+fullPlayer.style.display="none";
+}
+
+});
+
+<\/script>
+
+</body>
+</html>
+
+`;
+
+const desktopHTML = `
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Just Listen</title>
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',Tahoma,sans-serif;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+display:flex;
+flex-direction:column;
+height:100vh;
+}
+
+/* HEADER */
+
+.header{
+display:grid;
+grid-template-columns:1fr 2fr 1fr;
+align-items:center;
+padding:15px 25px;
+font-size:20px;
+font-weight:600;
+}
+
+.header div:first-child{
+justify-self:start;
+}
+
+/* SEARCH */
+
+.search-bar{
+display:flex;
+justify-content:center;
+}
+
+.search-bar input{
+width:60%;
+padding:10px;
+border-radius:25px;
+border:none;
+outline:none;
+font-size:14px;
+}
+
+/* MAIN LAYOUT */
+
+.main-layout{
+display:flex;
+flex:1;
+gap:20px;
+padding:10px;
+overflow:hidden;
+padding-bottom:80px;
+}
+
+.left-panel{
+flex:2;
+overflow-y:auto;
+}
+
+.right-panel{
+flex:1;
+}
+
+/* SONG LIST */
+
+.song-card{
+display:flex;
+align-items:center;
+background:rgba(255,255,255,0.08);
+border-radius:15px;
+padding:12px;
+margin-bottom:12px;
+cursor:pointer;
+transition:0.2s;
+}
+
+.song-card:hover{
+background:rgba(255,255,255,0.15);
+}
+
+.song-card img{
+width:60px;
+height:60px;
+border-radius:10px;
+object-fit:cover;
+margin-right:15px;
+}
+
+.song-title{
+font-size:16px;
+}
+
+.artist{
+font-size:12px;
+color:#cbd5e1;
+}
+
+/* BANNER */
+
+.banner{
+background:rgba(255,255,255,0.08);
+border-radius:20px;
+padding:20px;
+text-align:center;
+max-height:400px;
+overflow:hidden;
+}
+
+.banner img{
+width:100%;
+max-height:345px;
+object-fit:cover;
+border-radius:15px;
+margin-bottom:10px;
+}
+
+/* FOOTER PLAYER */
+
+.footer{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:#0f172a;
+padding:12px 25px;
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.footer img{
+width:58px;
+height:58px;
+border-radius:10px;
+object-fit:cover;
+margin-right:12px;
+}
+
+.footer .info{
+flex:1;
+}
+
+.footer .controls{
+display:flex;
+gap:15px;
+margin-right:140px;
+}
+
+button{
+border:none;
+border-radius:50%;
+background:#22c55e;
+color:white;
+cursor:pointer;
+width:50px;
+height:50px;
+font-size:18px;
+}
+
+/* PROGRESS BAR */
+
+.progress-container{
+width:80%;
+height:6px;
+background:silver;
+border-radius:5px;
+margin:6px 0;
+cursor:pointer;
+position:relative;
+}
+
+.progress{
+height:100%;
+width:0%;
+background:#22c55e;
+border-radius:5px;
+position:relative;
+}
+
+.progress::after{
+content:"";
+position:absolute;
+right:-8px;
+top:50%;
+transform:translateY(-50%);
+width:16px;
+height:16px;
+background:white;
+border-radius:50%;
+cursor:pointer;
+}
+
+.time{
+display:flex;
+justify-content:space-between;
+font-size:12px;
+width:80%;
+}
+
+.hover-time{
+position:absolute;
+top:-25px;
+background:black;
+padding:3px 6px;
+border-radius:4px;
+font-size:11px;
+display:none;
+transform:translateX(-50%);
+white-space:nowrap;
+}
+
+#footerTitle{
+font-size:15px;
+font-weight:500;
+line-height:1.2;
+}
+
+#footerArtist{
+font-size:12px;
+color:#cbd5e1;
+margin-top:2px;
+}
+
+.left-panel::-webkit-scrollbar{
+width:4px;
+}
+
+.left-panel::-webkit-scrollbar-thumb{
+background:#475569;
+border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+<div>Just Listen</div>
+
+<div class="search-bar">
+<input type="text" id="searchInput" placeholder="SEARCH SONGS">
+</div>
+
+</div>
+
+<div class="main-layout">
+
+<div class="left-panel">
+<div id="songList"></div>
+</div>
+
+<div class="right-panel">
+
+<div class="banner">
+
+<img id="bannerCover" src="cover.png">
+
+<div id="bannerTitle">No song</div>
+<div id="bannerArtist"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+<img id="footerCover" src="cover.png">
+
+<div class="info">
+
+<div id="footerTitle">No song playing</div>
+<div id="footerArtist"></div>
+
+<div class="progress-container" id="progressContainer">
+<div class="progress" id="progress"></div>
+<div class="hover-time" id="hoverTime">0:00</div>
+</div>
+
+<div class="time">
+<span id="currentTime">0:00</span>
+<span id="duration">0:00</span>
+</div>
+
+</div>
+
+<div class="controls">
+<button onclick="prevSong()">⏮</button>
+<button onclick="togglePlay()" id="playBtn">▶</button>
+<button onclick="nextSong()">⏭</button>
+</div>
+
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+
+/* SONG DATA */
+
+const songs=[
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Kadhale-Kadhale.mp3",
+title:"Kadhale Kadhale",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Enna-Nadanthalum-MassTamilan.com.mp3",
+title:"Enna Nadanthalum",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Meesaya-Murukku.mp3",
+title:"Meesaya Murukku",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Vaadi-Pulla-Vaadi.mp3",
+title:"Vaadi Pulla Vaadi",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Oxygen-Thanthale.mp3",
+title:"Oxygen Thanthale",
+artist:"Hiphop Tamizha",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+},
+
+{
+url:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Anbe%20Aaruyirae.mp3",
+title:"Anbe Aaruyire",
+artist:"Prashan Sean",
+cover:"https://pub-46b3e229122a4c9ea7141f6920559012.r2.dev/Cover.png"
+}
+
+];
+
+let currentIndex=0;
+
+const audio=document.getElementById("audio");
+const playBtn=document.getElementById("playBtn");
+const songList=document.getElementById("songList");
+
+const footerTitle=document.getElementById("footerTitle");
+const footerArtist=document.getElementById("footerArtist");
+const footerCover=document.getElementById("footerCover");
+
+const bannerTitle=document.getElementById("bannerTitle");
+const bannerArtist=document.getElementById("bannerArtist");
+const bannerCover=document.getElementById("bannerCover");
+
+const progress=document.getElementById("progress");
+const progressContainer=document.getElementById("progressContainer");
+
+const currentTimeEl=document.getElementById("currentTime");
+const durationEl=document.getElementById("duration");
+
+function loadSong(index){
+
+const song=songs[index];
+
+audio.src=song.url;
+
+footerTitle.textContent=song.title;
+footerArtist.textContent=song.artist;
+footerCover.src=song.cover;
+
+bannerTitle.textContent=song.title;
+bannerArtist.textContent=song.artist;
+bannerCover.src=song.cover;
+
+}
+
+function togglePlay(){
+
+if(audio.paused){
+audio.play();
+playBtn.textContent="⏸";
+}else{
+audio.pause();
+playBtn.textContent="▶";
+}
+
+}
+
+function nextSong(){
+currentIndex=(currentIndex+1)%songs.length;
+loadSong(currentIndex);
+audio.play();
+playBtn.textContent="⏸";
+}
+
+function prevSong(){
+currentIndex=(currentIndex-1+songs.length)%songs.length;
+loadSong(currentIndex);
+audio.play();
+playBtn.textContent="⏸";
+}
+
+audio.addEventListener("ended",nextSong);
+
+/* SONG LIST */
+
+songs.forEach((song,i)=>{
+
+const card=document.createElement("div");
+
+card.className="song-card";
+
+card.innerHTML =
+"<img src='"+song.cover+"'>" +
+"<div>" +
+"<div class='song-title'>"+song.title+"</div>" +
+"<div class='artist'>"+song.artist+"</div>" +
+"</div>";
+
+card.onclick=()=>{
+currentIndex=i;
+loadSong(i);
+audio.play();
+playBtn.textContent="⏸";
+};
+
+songList.appendChild(card);
+
+});
+
+/* SEARCH */
+
+document.getElementById("searchInput").addEventListener("input",(e)=>{
+
+const query=e.target.value.toLowerCase();
+
+[...songList.children].forEach(card=>{
+
+const text=card.innerText.toLowerCase();
+
+card.style.display=text.includes(query)?"flex":"none";
+
+});
+
+});
+
+
+/* PROGRESS UPDATE */
+
+audio.addEventListener("timeupdate",()=>{
+
+if(!audio.duration)return;
+
+const percent=(audio.currentTime/audio.duration)*100;
+
+progress.style.width=percent+"%";
+
+currentTimeEl.textContent=formatTime(audio.currentTime);
+durationEl.textContent=formatTime(audio.duration);
+
+});
+
+
+const hoverTime=document.getElementById("hoverTime");
+
+
+/* HOVER TIME PREVIEW */
+
+progressContainer.addEventListener("mousemove",(e)=>{
+
+const rect=progressContainer.getBoundingClientRect();
+
+let percent=(e.clientX-rect.left)/rect.width;
+
+percent=Math.max(0,Math.min(1,percent));
+
+if(!audio.duration) return;
+let time=percent*audio.duration;
+
+hoverTime.style.display="block";
+hoverTime.style.left=(percent*progressContainer.offsetWidth)+"px";
+hoverTime.textContent=formatTime(time);
+
+});
+
+
+progressContainer.addEventListener("mouseleave",()=>{
+hoverTime.style.display="none";
+});
+
+
+function formatTime(sec){
+
+const m=Math.floor(sec/60)||0;
+const s=Math.floor(sec%60)||0;
+
+return m+":"+s.toString().padStart(2,"0");
+
+}
+
+
+/* CLICK SEEK */
+
+progressContainer.addEventListener("click",e=>{
+
+const rect=progressContainer.getBoundingClientRect();
+const percent=(e.clientX-rect.left)/rect.width;
+
+audio.currentTime=percent*audio.duration;
+
+});
+
+
+/* DRAG SEEK LIKE SPOTIFY */
+
+let isDragging=false;
+
+progressContainer.addEventListener("mousedown",()=>{
+isDragging=true;
+});
+
+document.addEventListener("mouseup",()=>{
+isDragging=false;
+});
+
+document.addEventListener("mousemove",(e)=>{
+
+if(!isDragging) return;
+
+const rect=progressContainer.getBoundingClientRect();
+
+let percent=(e.clientX-rect.left)/rect.width;
+
+percent=Math.max(0,Math.min(1,percent));
+
+audio.currentTime=percent*audio.duration;
+
+});
+
+
+loadSong(currentIndex);
+
+<\/script>
+
+</body>
+</html>
+
+
+
+</body>
+</html>
+
+`;
+
+if(isMobile){
+
+document.write(mobileHTML);
+
+}else{
+
+document.write(desktopHTML);
+
+}
+
+</script>
+
+</head>
+<body>
+</body>
+</html>
